@@ -8,7 +8,10 @@ RUN dotnet publish -c Release -o /app
 # runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-ENV ASPNETCORE_URLS=http://0.0.0.0:10000
+
+# Render usa a variável de ambiente PORT automaticamente
+ENV ASPNETCORE_URLS=http://0.0.0.0:${PORT}
 COPY --from=build /app ./
-EXPOSE 10000
-CMD ["dotnet","TasklyApi.dll"]
+EXPOSE ${PORT}
+
+CMD ["dotnet", "TasklyApi.dll"]
