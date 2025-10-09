@@ -51,7 +51,7 @@ Password: 12345
 
 ## 🧠 Architecture
 
-
+```
 📦 Taskly Monorepo
 ├── /api → ASP.NET 8 Web API (C#)
 │ ├── Controllers
@@ -70,8 +70,7 @@ Password: 12345
 ├── /scripts → CI/CD, build & deploy configs
 └── README.md
 
-
-
+```
 ---
 ## 📈 Dashboard
 
