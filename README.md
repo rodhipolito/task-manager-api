@@ -28,9 +28,8 @@ It’s designed with clean architecture, role-based authentication, and real-tim
 
 ## 🚀 Live Demo
 
-🌐 **Frontend:** [https://taskly-helpdesk.vercel.app](https://taskly-helpdesk.vercel.app)  
-⚙️ **API:** [https://tickets-manager-api.vercel.app](https://tickets-manager-api.vercel.app)
-
+🌐 **Frontend:** https://tickets-manager-api.vercel.app/  
+⚙️ **API:** 
 🧑‍💻 **Test User**
 Login: teste@teste.com
 Password: 12345
