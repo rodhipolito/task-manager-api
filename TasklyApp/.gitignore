@@ -1,0 +1,24 @@
+# === General ===
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# === Node / React ===
+TasklyApp/node_modules/
+TasklyApp/dist/
+TasklyApp/build/
+
+# === .NET ===
+TasklyApi/bin/
+TasklyApi/obj/
+
+# === Environment / Secrets ===
+.env
+.env.*
+senhadb.txt
+
+# === System ===
+*.user
+*.db

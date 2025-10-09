@@ -1,0 +1,33 @@
+﻿## .NET ##
+**/bin/
+**/obj/
+**/appsettings.Development.json
+.env 
+## Visual Studio ##
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.scc
+
+## NuGet ##
+**/packages/
+*.nupkg
+*.nuspec
+
+## OS ##
+Thumbs.db
+.DS_Store

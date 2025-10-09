@@ -1,0 +1,6 @@
+@TasklyApi_HostAddress = http://localhost:5004
+
+GET {{TasklyApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

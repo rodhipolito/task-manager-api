@@ -1,0 +1,17 @@
+services:
+- type: web
+  name: taskly-api
+  env: docker
+  rootDir: TasklyApi
+  plan: free
+  autoDeploy: true
+  envVars:
+    - key: RENDER
+      value: "true"
+    - key: JWT_KEY
+      sync: false
+    - key: DB_CONNECTION_STRING
+      sync: false
+    - key: CORS_ORIGIN
+      value: https://taskly-app.vercel.app
+  dockerfilePath: ./TasklyApi/Dockerfile

@@ -1,0 +1,58 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [ ""main"" ]
+  pull_request:
+    branches: [ ""main"" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Backend - .NET API
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies (API)
+        working-directory: ./TasklyApi
+        run: dotnet restore
+
+      - name: Build API
+        working-directory: ./TasklyApi
+        run: dotnet build -c Release --no-restore
+
+      - name: Test API
+        working-directory: ./TasklyApi
+        run: dotnet test --verbosity normal
+
+      # Frontend - React
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./TasklyApp/package-lock.json
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./TasklyApp
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: ./TasklyApp
+        run: npm run build
+
+      - name: Test Frontend
+        working-directory: ./TasklyApp
+        run: npm run test -- --coverage --watchAll=false
+
+      # Security check
+      - name: Run security audit
+        working-directory: ./TasklyApp
+        run: npm audit --audit-level moderate
