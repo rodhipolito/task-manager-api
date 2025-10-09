@@ -51,6 +51,7 @@ Password: 12345
 
 ## 🧠 Architecture
 
+
 📦 Taskly Monorepo
 ├── /api → ASP.NET 8 Web API (C#)
 │ ├── Controllers
@@ -70,10 +71,8 @@ Password: 12345
 └── README.md
 
 
-🧩 **Modular by design** — backend and frontend evolve independently, sharing only environment configs and build pipelines.
 
 ---
-
 ## 📈 Dashboard
 
 Taskly comes with a powerful analytics dashboard built with **Recharts**, giving you:
