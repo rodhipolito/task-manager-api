@@ -1,17 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../useAuth";
+import { Loader2 } from "lucide-react"; // <── adicionado
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const nav = useNavigate();
   const { login } = useAuth();
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await login(email, password);
-    nav("/dashboard");
+    setLoading(true);
+    try {
+      await login(email, password);
+      nav("/dashboard");
+    } catch (err) {
+      console.error("Login failed:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,7 +38,6 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-
           <input
             type="password"
             placeholder="Password"
@@ -37,12 +45,17 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-3 transition-all"
+            disabled={loading}
+            className={`w-full flex justify-center items-center gap-2 font-semibold rounded-lg py-3 transition-all ${
+              loading
+                ? "bg-indigo-400 cursor-not-allowed text-white"
+                : "bg-indigo-600 hover:bg-indigo-700 text-white"
+            }`}
           >
-            Sign In
+            {loading && <Loader2 className="h-5 w-5 animate-spin text-white" />}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
