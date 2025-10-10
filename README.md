@@ -1,119 +1,141 @@
-# Taskly v2 — Helpdesk (ASP.NET 8 + React + Supabase)
+# 🎫 Taskly — Full-Stack Helpdesk Platform
 
-Sistema de Helpdesk full-stack com autenticação JWT, CRUD de tickets, comentários, dashboard (Recharts), Swagger e deploy em Render (API) + Vercel (frontend).
+> **Helpdesk reinvented for modern teams.**  
+> Manage tickets, track progress, and collaborate — all in one sleek dashboard.
 
-## Stack
-- **Backend:** ASP.NET Core 8 Web API (C#)
-- **DB:** PostgreSQL (Supabase)
-- **ORM:** EF Core + Npgsql
-- **Auth:** JWT + Roles (Admin, Agent, Client) + Refresh Token
-- **Docs:** Swagger (`/swagger`)
-- **Frontend:** React + TypeScript + Vite + Tailwind + Zustand + Recharts
-- **Infra:** Render (API) + Vercel (Web)
-- **CI/CD:** GitHub Actions
+---
 
-## Estrutura
+## ✨ Overview
 
-/Taskly
-├── /TasklyApi # ASP.NET 8 Web API
-├── /TasklyApp # React + Vite + TS
-├── .github/workflows/deploy.yml
-├── render.yaml
-├── .env.example
-└── README.md
+Taskly is a **full-stack Helpdesk & Ticket Management System** built for modern development teams and support centers.  
+It’s designed with clean architecture, role-based authentication, and real-time dashboards — ready for production and easy to deploy.
 
+---
 
+## ⚙️ Tech Stack
 
-## Variáveis
-Backend (`.env` ou envs no Render):
+**Frontend:** React + TypeScript + TailwindCSS  
+**Backend:** ASP.NET Core 8 Web API  
+**Database:** PostgreSQL (via Supabase)  
+**ORM:** Entity Framework Core  
+**Auth:** JWT + Refresh Tokens  
+**Realtime:** SignalR *(optional)*  
+**Infra:** Render (API) + Vercel (Frontend)  
+**CI/CD:** GitHub Actions  
+**Docs:** Swagger / OpenAPI  
 
-Frontend (`TasklyApp/.env`):
+---
 
+## 🚀 Live Demo
 
-
-## Rodar local
-### API
-```bash
-cd TasklyApi
-dotnet ef database update
-dotnet run
-# http://localhost:5000/swagger
-
-
-
-
-## Rodar local
-### API
-```bash
-cd TasklyApi
-dotnet ef database update
-dotnet run
-# http://localhost:5000/swagger
-
-
-cd TasklyApp
-npm i
-npm run dev
-# http://localhost:5173
-
-
-
-Endpoints principais
-
-POST /api/auth/register
-
-POST /api/auth/login
-
-POST /api/auth/refresh
-
-GET /api/auth/me
-
-GET /api/tickets
-
-POST /api/tickets
-
-GET /api/tickets/{id}
-
-PUT /api/tickets/{id}
-
-DELETE /api/tickets/{id} (Admin/Agent)
-
-POST /api/tickets/{id}/comments
-
-GET /api/dashboard/kpis
-
-Deploy
-
-Render: serviço Web com Dockerfile em TasklyApi/. Configure envs JWT_KEY, DB_CONNECTION_STRING, CORS_ORIGIN.
-
-Vercel: projeto TasklyApp com VITE_API_URL apontando para a API no Render.
-
-Usuário de teste (exemplo)
-
-Crie via /api/auth/register:
-
-{ "email": "teste@teste.com", "password": "12345", "role": "Admin" }
+🌐 **Frontend:** https://tickets-manager-api.vercel.app/  
+⚙️ **API:** 
+🧑‍💻 **Test User**
+Login: teste@teste.com
+Password: 12345
 
 
 ---
 
-# 9) Comando final de “colar e rodar”
+## 🎯 Features
 
-```powershell
-# Na raiz /Taskly — instalar deps, criar DB local, rodar API e web
-cd TasklyApi
-$env:JWT_KEY="supersecretkey"
-$env:DB_CONNECTION_STRING="Host=localhost;Database=taskly;Username=postgres;Password=postgres"
-$env:CORS_ORIGIN="http://localhost:5173"
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-dotnet run
-# Swagger: http://localhost:5000/swagger
+✅ Secure login with JWT & refresh tokens  
+✅ Role-based access: **Admin · Agent · Client**  
+✅ CRUD for tickets with priority, status & history  
+✅ Interactive dashboard with charts (Recharts)  
+✅ Real-time notifications via SignalR  
+✅ Fully documented API via Swagger  
+✅ Production-ready CI/CD on every push  
 
+---
 
-Em outro terminal:
+## 🧠 Architecture
 
-cd Taskly/TasklyApp
-npm i
-$env:VITE_API_URL="http://localhost:5000/api"
-npm run dev
+```
+📦 Taskly Monorepo
+├── /api → ASP.NET 8 Web API (C#)
+│ ├── Controllers
+│ ├── DTOs
+│ ├── Models
+│ ├── Data (EF Core)
+│ └── Program.cs
+│
+├── /web → React + TypeScript + Tailwind
+│ ├── components/
+│ ├── pages/
+│ ├── hooks/
+│ ├── api/
+│ └── routes/
+│
+├── /scripts → CI/CD, build & deploy configs
+└── README.md
+
+```
+---
+## 📈 Dashboard
+
+Taskly comes with a powerful analytics dashboard built with **Recharts**, giving you:
+- Tickets by priority & status  
+- Tickets per agent  
+- Daily/weekly performance trends  
+
+---
+
+## 🧩 API Documentation
+
+Swagger UI available at:  
+👉 `/swagger/index.html`  
+
+https://task-manager-api-c5y1.onrender.com/swagger/index.html
+
+Includes all endpoints with schemas, models, and example requests/responses.
+
+---
+
+## ⚡ CI/CD Workflow
+
+✅ **GitHub Actions** automatically builds, tests, and deploys both apps  
+✅ **Render** hosts the .NET API  
+✅ **Vercel** hosts the React frontend  
+✅ Zero manual steps — every push to `main` goes live 🚀  
+
+---
+
+## 🗺️ Roadmap
+
+- [x] JWT Authentication  
+- [x] Role System (Admin / Agent / Client)  
+- [x] Tickets CRUD  
+- [x] Dashboard Analytics  
+- [ ] Real-time chat via SignalR  
+- [ ] Email notifications  
+- [ ] Team metrics and SLA reports  
+
+---
+
+## 🧑‍💻 Author
+
+**Rodrigo Silva** — Backend Developer & Data Solutions  
+📍 Lisbon, Portugal  
+
+💼 [LinkedIn](https://www.linkedin.com/in/rodrigo-hipolito-silva/)  
+🌐 [GitHub](https://github.com/rodhipolito)
+
+> “Build fast. Deploy smart. Learn endlessly.” ⚡
+
+---
+
+## 💬 Contribute
+
+Pull requests and ideas are welcome!  
+If you find a bug or want to suggest a feature, open an issue — let’s make Taskly even better together 💙
+
+---
+
+## 🛡️ License
+
+MIT License — free to use, modify and share.
+
+---
+
+⭐ **Star this repo** if you like it — it helps others discover Taskly!  
