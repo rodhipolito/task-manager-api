@@ -48,7 +48,20 @@ namespace TasklyApi.Controllers
 
             var access = _jwt.GenerateAccessToken(user);
             (user.RefreshToken, user.RefreshTokenExpiry) = _jwt.GenerateRefreshToken();
-            await _db.SaveChangesAsync();
+
+            var tries = 0;
+            while (true)
+            {
+                try
+                {
+                    await _db.SaveChangesAsync();
+                    break;
+                }
+                catch (DbUpdateException) when (tries++ < 3)
+                {
+                    await Task.Delay(400 * tries);
+                }
+            }
 
             return Ok(new { accessToken = access, refreshToken = user.RefreshToken, role = user.Role });
         }
@@ -63,7 +76,20 @@ namespace TasklyApi.Controllers
 
             var access = _jwt.GenerateAccessToken(user);
             (user.RefreshToken, user.RefreshTokenExpiry) = _jwt.GenerateRefreshToken();
-            await _db.SaveChangesAsync();
+
+            var tries = 0;
+            while (true)
+            {
+                try
+                {
+                    await _db.SaveChangesAsync();
+                    break;
+                }
+                catch (DbUpdateException) when (tries++ < 3)
+                {
+                    await Task.Delay(400 * tries);
+                }
+            }
 
             return Ok(new { accessToken = access, refreshToken = user.RefreshToken, role = user.Role });
         }

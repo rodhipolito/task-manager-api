@@ -22,3 +22,9 @@ senhadb.txt
 # === System ===
 *.user
 *.db
+
+# segredos
+.env
+.env.*
+appsettings.*.json
+appsettings.*.Production.json

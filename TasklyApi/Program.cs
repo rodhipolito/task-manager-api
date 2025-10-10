@@ -7,9 +7,12 @@ using Npgsql;
 using System.Text;
 using TasklyApi.Data;
 
+// ✅ evita diferenças de timestamp em alguns ambientes
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
-// ====== Load .env (local environment only) ======
+// ====== Load .env (local only) ======
 try
 {
     if (builder.Environment.IsDevelopment())
@@ -23,22 +26,20 @@ catch (Exception ex)
     Console.WriteLine($".env file could not be loaded: {ex.Message}");
 }
 
-// ====== Config resolver ======
+// ====== Helpers ======
 static string ResolveConfigValue(string? envValue, string? configValue, string fallback)
 {
-    if (!string.IsNullOrWhiteSpace(envValue))
-        return envValue;
-    if (!string.IsNullOrWhiteSpace(configValue))
-        return configValue;
+    if (!string.IsNullOrWhiteSpace(envValue)) return envValue!;
+    if (!string.IsNullOrWhiteSpace(configValue)) return configValue!;
     return fallback;
 }
 
-// ====== Detect Render environment ======
+// ====== Detect Render ======
 var isRender = Environment.GetEnvironmentVariable("RENDER") == "true";
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 builder.WebHost.UseUrls(isRender ? $"http://0.0.0.0:{port}" : "http://localhost:5000");
 
-// ====== Load critical variables ======
+// ====== Load critical vars ======
 var jwtKey = ResolveConfigValue(
     Environment.GetEnvironmentVariable("JWT_KEY"),
     builder.Configuration["JWT_KEY"],
@@ -47,14 +48,14 @@ var jwtKey = ResolveConfigValue(
 var connStr = ResolveConfigValue(
     Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"),
     builder.Configuration.GetConnectionString("DefaultConnection"),
-    "Host=localhost;Database=taskly;Username=postgres;Password=postgres");
+    "Host=localhost;Port=5432;Database=taskly;Username=postgres;Password=postgres;SSL Mode=Disable");
 
 var corsOrigin = ResolveConfigValue(
     Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS"),
     builder.Configuration["CORS_ALLOWED_ORIGINS"],
     "http://localhost:5173");
 
-// ====== Log configuration check ======
+// ====== Log config ======
 Console.WriteLine("Environment Check:");
 Console.WriteLine($"   JWT_KEY: {(string.IsNullOrWhiteSpace(jwtKey) ? "Missing" : "Loaded")}");
 Console.WriteLine($"   DB_CONNECTION_STRING: {(string.IsNullOrWhiteSpace(connStr) ? "Missing" : "Loaded")}");
@@ -62,17 +63,22 @@ Console.WriteLine($"   CORS_ALLOWED_ORIGINS: {(string.IsNullOrWhiteSpace(corsOri
 
 // ====== Services ======
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseNpgsql(connStr, npgsqlOptions =>
-        npgsqlOptions.EnableRetryOnFailure(
+    opt.UseNpgsql(connStr, npgsql =>
+    {
+        // ⬇️ valores seguros para Supabase via POOLER (6543)
+        npgsql.CommandTimeout(30);
+        npgsql.EnableRetryOnFailure(
             maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
+            maxRetryDelay: TimeSpan.FromSeconds(2),
             errorCodesToAdd: null
-        )));
+        );
+    })
+);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// ====== Swagger + JWT Auth ======
+// ====== Swagger + JWT ======
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v2", new OpenApiInfo
@@ -98,21 +104,27 @@ builder.Services.AddSwaggerGen(c =>
     };
 
     c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { securityScheme, Array.Empty<string>() }
-    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement { { securityScheme, Array.Empty<string>() } });
 });
 
-// ====== CORS ======
+// ====== CORS (aceita múltiplas origins + previews *.vercel.app) ======
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("TasklyCors", policy =>
     {
-        policy.WithOrigins(corsOrigin.Split(';', StringSplitOptions.RemoveEmptyEntries))
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        var allowed = corsOrigin.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        policy
+            .SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrWhiteSpace(origin)) return false;
+                if (allowed.Contains(origin, StringComparer.OrdinalIgnoreCase)) return true;
+                // libera previews do Vercel (branch deploys)
+                return origin.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase);
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -166,7 +178,7 @@ void WaitForDatabase(string connectionString, int maxAttempts = 5, int delaySeco
 // ====== Automatic migrations ======
 using (var scope = app.Services.CreateScope())
 {
-    WaitForDatabase(connStr); // Wait until database is available
+    WaitForDatabase(connStr);
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
@@ -175,7 +187,6 @@ using (var scope = app.Services.CreateScope())
 app.UseCors("TasklyCors");
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 // ====== Swagger ======
