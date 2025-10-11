@@ -38,9 +38,12 @@ static string ResolveConfigValue(string? envValue, string? configValue, string f
     return fallback;
 }
 
-// ====== Detect Render ======
-var isRender = Environment.GetEnvironmentVariable("RENDER") == "true";
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+// ====== Detect Render / URLs ======
+var isRender =
+    !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PORT")) ||
+    string.Equals(Environment.GetEnvironmentVariable("RENDER"), "true", StringComparison.OrdinalIgnoreCase);
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls(isRender ? $"http://0.0.0.0:{port}" : "http://localhost:5000");
 
 // ====== Load critical vars ======
@@ -60,23 +63,23 @@ var corsOrigin = ResolveConfigValue(
     "http://localhost:5173");
 
 // ====== Log active database host ======
-        Console.ForegroundColor = ConsoleColor.Blue;
-        try
-        {
-            var connInfo = new NpgsqlConnectionStringBuilder(connStr);
-            Console.WriteLine($"🔗 Active DB Host: {connInfo.Host}");
-        }
-        catch
-        {
-            Console.WriteLine("🔗 Active DB Host: (could not parse connection string)");
-        }
-        Console.ResetColor();
+Console.ForegroundColor = ConsoleColor.Blue;
+try
+{
+    var connInfo = new NpgsqlConnectionStringBuilder(connStr);
+    Console.WriteLine($"🔗 Active DB Host: {connInfo.Host}");
+}
+catch
+{
+    Console.WriteLine("🔗 Active DB Host: (could not parse connection string)");
+}
+Console.ResetColor();
 
 // ====== Services ======
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(connStr, npgsql =>
     {
-        // 💪 aumenta a tolerância a latência do Supabase
+        // 💪 tolerância maior a latência (Supabase)
         npgsql.CommandTimeout(120);
         npgsql.EnableRetryOnFailure(
             maxRetryCount: 10,
@@ -210,7 +213,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 // ====== Swagger ======
-if (app.Environment.IsDevelopment() || isRender)
+if (app.Environment.IsDevelopment() || isRender ||
+    string.Equals(Environment.GetEnvironmentVariable("ENABLE_SWAGGER"), "true", StringComparison.OrdinalIgnoreCase))
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
