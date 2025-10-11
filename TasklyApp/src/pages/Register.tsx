@@ -1,35 +1,21 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../useAuth";
-import Input from "../components/Input";
-import Button from "../components/Button";
+// src/pages/Register.tsx
+import { Link } from "react-router-dom";
 
-export default function Register(){
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Client");
-  const nav = useNavigate();
-  const { register } = useAuth();
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await register(email, password, role);
-    nav("/dashboard");
-  };
-
+export default function Register() {
   return (
-    <div className="grid place-items-center h-screen">
-      <form onSubmit={submit} className="w-80 space-y-3">
-        <h2 className="text-2xl font-bold mb-4">Register</h2>
-        <Input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <Input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-        <select className="border rounded-xl px-3 py-2 w-full" value={role} onChange={e => setRole(e.target.value)}>
-          <option>Client</option>
-          <option>Agent</option>
-          <option>Admin</option>
-        </select>
-        <Button type="submit">Create Account</Button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow p-6 text-center">
+        <h1 className="text-2xl font-semibold mb-2">Registo desativado</h1>
+        <p className="text-gray-600 mb-6">
+          O registo de novos utilizadores está temporariamente desativado.
+        </p>
+        <Link
+          to="/login"
+          className="inline-block rounded-xl px-4 py-2 border border-gray-300 hover:bg-gray-100"
+        >
+          Ir para o Login
+        </Link>
+      </div>
     </div>
   );
 }

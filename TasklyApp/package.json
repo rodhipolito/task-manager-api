@@ -6,7 +6,7 @@
   "description": "Frontend do Taskly Helpdesk (React + TypeScript + Vite + TailwindCSS)",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node ./node_modules/typescript/bin/tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -38,6 +38,6 @@
     "rimraf": "^6.0.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.19.1"
   }
 }

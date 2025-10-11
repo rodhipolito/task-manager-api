@@ -13,3 +13,8 @@ npm-debug.log*
 .vscode/
 .DS_Store
 Thumbs.db
+TasklyApp/node_modules/
+TasklyApp/dist/
+TasklyApp/.env
+TasklyApp/.env.*
+!TasklyApp/.env.example
