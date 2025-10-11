@@ -38,7 +38,7 @@ O projeto foi desenhado com **arquitetura limpa, autenticação segura e dashboa
 ## 🚀 Live Demo  
 
 🌐 **Frontend:** [https://tickets-manager-api.vercel.app](https://tickets-manager-api.vercel.app)  
-⚙️ **API:** [https://task-manager-api-c5y1.onrender.com](https://task-manager-api-c5y1.onrender.com)  
+⚙️ **API:** https://task-manager-api-c5y1.onrender.com/swagger/index.html
 
 🧑‍💻 **Demo Login**  
 
