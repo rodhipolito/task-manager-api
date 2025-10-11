@@ -46,6 +46,9 @@ var isRender =
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls(isRender ? $"http://0.0.0.0:{port}" : "http://localhost:5000");
 
+// (opcional) log pra confirmar:
+Console.WriteLine($"🌐 Binding on {(isRender ? $"0.0.0.0:{port}" : "localhost:5000")}");
+
 // ====== Load critical vars ======
 var jwtKey = ResolveConfigValue(
     Environment.GetEnvironmentVariable("JWT_KEY"),
