@@ -7,23 +7,27 @@ using Npgsql;
 using System.Text;
 using TasklyApi.Data;
 
-// ✅ evita diferenças de timestamp em alguns ambientes
+// ✅ Corrige comportamento de timestamp em alguns ambientes
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ====== Load .env (local only) ======
+// ====== Load .env (somente local) ======
 try
 {
     if (builder.Environment.IsDevelopment())
     {
         Env.Load();
-        Console.WriteLine(".env file loaded successfully.");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(".env file loaded successfully ✅");
+        Console.ResetColor();
     }
 }
 catch (Exception ex)
 {
+    Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine($".env file could not be loaded: {ex.Message}");
+    Console.ResetColor();
 }
 
 // ====== Helpers ======
@@ -55,21 +59,28 @@ var corsOrigin = ResolveConfigValue(
     builder.Configuration["CORS_ALLOWED_ORIGINS"],
     "http://localhost:5173");
 
-// ====== Log config ======
-Console.WriteLine("Environment Check:");
-Console.WriteLine($"   JWT_KEY: {(string.IsNullOrWhiteSpace(jwtKey) ? "Missing" : "Loaded")}");
-Console.WriteLine($"   DB_CONNECTION_STRING: {(string.IsNullOrWhiteSpace(connStr) ? "Missing" : "Loaded")}");
-Console.WriteLine($"   CORS_ALLOWED_ORIGINS: {(string.IsNullOrWhiteSpace(corsOrigin) ? "Missing" : corsOrigin)}");
+// ====== Log active database host ======
+        Console.ForegroundColor = ConsoleColor.Blue;
+        try
+        {
+            var connInfo = new NpgsqlConnectionStringBuilder(connStr);
+            Console.WriteLine($"🔗 Active DB Host: {connInfo.Host}");
+        }
+        catch
+        {
+            Console.WriteLine("🔗 Active DB Host: (could not parse connection string)");
+        }
+        Console.ResetColor();
 
 // ====== Services ======
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(connStr, npgsql =>
     {
-        // ⬇️ valores seguros para Supabase via POOLER (6543)
-        npgsql.CommandTimeout(30);
+        // 💪 aumenta a tolerância a latência do Supabase
+        npgsql.CommandTimeout(120);
         npgsql.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(2),
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
             errorCodesToAdd: null
         );
     })
@@ -107,19 +118,22 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(new OpenApiSecurityRequirement { { securityScheme, Array.Empty<string>() } });
 });
 
-// ====== CORS (aceita múltiplas origins + previews *.vercel.app) ======
+// ====== CORS (múltiplas origins + Vercel previews) ======
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("TasklyCors", policy =>
     {
-        var allowed = corsOrigin.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var allowed = corsOrigin.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine($"🌍 CORS origins loaded: {string.Join(", ", allowed)}");
+        Console.ResetColor();
 
         policy
             .SetIsOriginAllowed(origin =>
             {
                 if (string.IsNullOrWhiteSpace(origin)) return false;
                 if (allowed.Contains(origin, StringComparer.OrdinalIgnoreCase)) return true;
-                // libera previews do Vercel (branch deploys)
+                // Libera previews do Vercel (branch deploys)
                 return origin.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase);
             })
             .AllowAnyHeader()
@@ -158,15 +172,21 @@ void WaitForDatabase(string connectionString, int maxAttempts = 5, int delaySeco
             Console.WriteLine($"🔄 Attempting to connect to database ({attempt}/{maxAttempts})...");
             using var conn = new NpgsqlConnection(connectionString);
             conn.Open();
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("✅ Database connection established successfully!");
+            Console.ResetColor();
             return;
         }
         catch (Exception ex)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"⚠️ Database connection failed: {ex.Message}");
+            Console.ResetColor();
             if (attempt == maxAttempts)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("❌ Max retry attempts reached. Database is not reachable.");
+                Console.ResetColor();
                 throw;
             }
             Console.WriteLine($"⏳ Retrying in {delaySeconds} seconds...");
@@ -200,4 +220,5 @@ if (app.Environment.IsDevelopment() || isRender)
     });
 }
 
+// ====== Run ======
 app.Run();
